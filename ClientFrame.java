@@ -1,44 +1,10 @@
-import java.awt.BorderLayout;
-
-import java.awt.event.ActionEvent;
-
-import java.awt.event.ActionListener;
-
-import java.awt.event.KeyAdapter;
-
-import java.awt.event.KeyEvent;
-
-import java.awt.event.WindowAdapter;
-
-import java.awt.event.WindowEvent;
-
-import java.io.DataInputStream;
-
-import java.io.DataOutputStream;
-
-import java.io.IOException;
-
-import java.io.InputStream;
-
-import java.io.OutputStream;
-
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 import java.net.Socket;
-
 import java.net.UnknownHostException;
+import javax.swing.*;
 
-
-
-import javax.swing.JButton;
-
-import javax.swing.JFrame;
-
-import javax.swing.JPanel;
-
-import javax.swing.JScrollPane;
-
-import javax.swing.JTextArea;
-
-import javax.swing.JTextField;
 
 
 
@@ -50,13 +16,14 @@ public class ClientFrame extends JFrame{
 
 	JButton btnSend;
 
+	JButton btnHelp;
 	
-
 	Socket socket;
 
 	DataInputStream dis;
 
 	DataOutputStream dos;	
+
 
 	
 
@@ -67,32 +34,33 @@ public class ClientFrame extends JFrame{
 		setBounds(450, 400, 500, 350);
 
 		
-
 		textArea = new JTextArea();		
 
 		textArea.setEditable(false); //쓰기 금지
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
-		add(scrollPane,BorderLayout.CENTER);
+		getContentPane().add(scrollPane,BorderLayout.CENTER);
 
-				
-
+		
+		
+		JPanel btnpanel = new JPanel();
+		
+		btnSend = new JButton("send");
+		btnHelp = new JButton("help");
+		btnpanel.add(btnSend, BorderLayout.EAST);
+		btnpanel.add(btnHelp, BorderLayout.EAST);
+		
 		JPanel msgPanel = new JPanel();
-
 		msgPanel.setLayout(new BorderLayout());
 
 		tfMsg = new JTextField();
-
-		btnSend = new JButton("send");
-
 		msgPanel.add(tfMsg, BorderLayout.CENTER);
-
-		msgPanel.add(btnSend, BorderLayout.EAST);
+		msgPanel.add(btnpanel, BorderLayout.EAST);
 
 		
-
-		add(msgPanel,BorderLayout.SOUTH);
+		
+		getContentPane().add(msgPanel,BorderLayout.SOUTH);
 
 		
 
@@ -141,8 +109,20 @@ public class ClientFrame extends JFrame{
 			}
 
 		});
-
 		
+		
+		//help 버튼 클릭에 반응하는 리스너 추가
+		btnHelp.addActionListener(new ActionListener() {			
+
+			@Override
+
+			public void actionPerformed(ActionEvent e) {
+
+				//help() 함수 실행;
+
+			}
+
+		});
 
 		setVisible(true);
 
