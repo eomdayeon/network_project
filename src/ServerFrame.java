@@ -1,87 +1,35 @@
-import java.awt.BorderLayout;
-
-import java.awt.event.ActionEvent;
-
-import java.awt.event.ActionListener;
-
-import java.awt.event.KeyAdapter;
-
-import java.awt.event.KeyEvent;
-
-import java.awt.event.WindowAdapter;
-
-import java.awt.event.WindowEvent;
-
-import java.io.DataInputStream;
-
-import java.io.DataOutputStream;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-
-import java.net.Socket;
-import java.util.Iterator;
-import java.util.Vector;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.JButton;
-
-import javax.swing.JFrame;
-
-import javax.swing.JPanel;
-
-import javax.swing.JScrollPane;
-
-import javax.swing.JTextArea;
-
-import javax.swing.JTextField;
-
-
-
-
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-
-
+import javax.swing.*;
 
 public class ServerFrame extends JFrame {
 
 	JTextArea textArea; //멤버 참조변수
 
 	JTextField tfMsg;
-
-	JButton btnSend;
-
+	JButton btnSend;  
 	
-	
-	ServerSocket serverSocket;  //accept시켜주는 소
-	Socket clientSocket;       //socket
-	
-	
+	ServerSocket serverSocket;  //accept시켜주는 소켓 (클라이언트와 연결할 때 필요한 ServerSocket class)
+	Socket clientSocket;       //socket 
+		
 	public static ExecutorService threadPool;
 	public static Vector<forClient> clients=new Vector<forClient>();
-	
-	
 	
 	DataInputStream dataInputStream;   //dis
 	DataOutputStream dataOutputStream; //dos
 	
-
+	
 	public ServerFrame() {		
 
 		setTitle("Server");
 
 		setBounds(450, 50, 500, 350);
-
-		
 
 		textArea = new JTextArea();		
 
@@ -89,12 +37,10 @@ public class ServerFrame extends JFrame {
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
-		add(scrollPane,BorderLayout.CENTER);
-
-				
+		add(scrollPane,BorderLayout.CENTER);				
 
 		JPanel msgPanel = new JPanel();
-
+		
 		msgPanel.setLayout(new BorderLayout());
 
 		tfMsg = new JTextField();
@@ -105,47 +51,15 @@ public class ServerFrame extends JFrame {
 
 		msgPanel.add(btnSend, BorderLayout.EAST);
 
-		
-
 		add(msgPanel,BorderLayout.SOUTH);
 
-		
-		
-		/*
-		//send 버튼 클릭에 반응하는 리스너 추가
-		btnSend.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				sendMessage();
-			}
-		});
-		//엔터키 눌렀을 때 반응하기
-		tfMsg.addKeyListener(new KeyAdapter() {
-			//키보드에서 키 하나를 눌렀을때 자동으로 실행되는 메소드..: 콜백 메소드
-			@Override
-			public void keyPressed(KeyEvent e) {				
-				super.keyPressed(e);
-				
-			//입력받은 키가 엔터인지 알아내기, KeyEvent 객체가 키에대한 정보 갖고있음
-				int keyCode = e.getKeyCode();
-				switch(keyCode) {
-				case KeyEvent.VK_ENTER:
-					sendMessage();
-					break;
-				}
-			}
-		});		  */
-		
-		
-		serverSetting();
-		
+		serverSetting();		
 
 		setVisible(true);
 
 		tfMsg.requestFocus();  //focus 주는 
 
 		
-
 		//상대방이 접속할 수 있도록 서버소켓을 만들고 통신할 수 있는 준비 작업!
 
 		//네트워크 작업을 Main Thread가 하게하면 다른 작업(키보드 입력, 클릭 등..)들을 
@@ -160,9 +74,7 @@ public class ServerFrame extends JFrame {
 		serverThread.setDaemon(true); //메인 끝나면 같이 종료
 		serverThread.start();*/
 		
-		
-	   
-
+	
 		addWindowListener(new WindowAdapter() {			
 
 			@Override //클라이언트 프레임에 window(창) 관련 리스너 추가
@@ -192,8 +104,6 @@ public class ServerFrame extends JFrame {
 		});
 
 	}//생성자 메소드	
-	
-	
 	
 		
 		public void serverSetting()
@@ -238,10 +148,7 @@ public class ServerFrame extends JFrame {
 			
 			threadPool=Executors.newCachedThreadPool();
 			threadPool.submit(thread);
-			
-					
-					
-					
+				
 		}
 		
 		
@@ -262,8 +169,7 @@ public class ServerFrame extends JFrame {
 					serverSocket.close();
 				if (threadPool !=null && !threadPool.isShutdown())
 					threadPool.shutdown();
-				
-				
+					
 			}catch (Exception e)
 			{
 				e.printStackTrace();

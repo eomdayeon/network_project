@@ -1,8 +1,4 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -19,6 +15,7 @@ public class forClient {
 		receive();
 		
 	}
+	
 	public void streamSetting(){
 		try {
 			dataInputStream= new DataInputStream(socket.getInputStream()); //dataInputStream을 통해 데이터가 온다.
@@ -31,13 +28,7 @@ public class forClient {
 		
 		
 	}
-	
-	
-	
-	
-
-	
-
+			
 	public void receive() {
 		Runnable thread=new Runnable() {
 			boolean isThread= true;
@@ -97,18 +88,12 @@ public class forClient {
 				}
 			
 			}
-			
-		
+					
 		};
 		ServerFrame.threadPool.submit(thread); //쓰레드 풀에 추가;
-		
-	   
-	
-		
+			
 	}
 	
-	
-
 	public void send(String message)
 	{
 		
@@ -123,9 +108,7 @@ public class forClient {
 						byte[] buffer=message.getBytes("UTF-8");
 						out.write(buffer);
 						out.flush();
-						
-					
-							
+								
 
 					} catch (Exception e) {
 						try {
@@ -158,6 +141,3 @@ public class forClient {
 	}
 }
 
-
-//quit해주면클라이언트 종료해주기
-//소켓 닫아주

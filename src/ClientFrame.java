@@ -1,96 +1,37 @@
 
 import java.awt.BorderLayout;
-
-import java.awt.event.ActionEvent;
-
-import java.awt.event.ActionListener;
-
-import java.awt.event.KeyAdapter;
-
-import java.awt.event.KeyEvent;
-
-import java.awt.event.WindowAdapter;
-
-import java.awt.event.WindowEvent;
-
-import java.io.DataInputStream;
-
-import java.io.DataOutputStream;
-
-import java.io.IOException;
-
-import java.io.InputStream;
-
-import java.io.OutputStream;
-
-import java.net.Socket;
-
-import java.net.UnknownHostException;
-
-
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Scanner;
-
-
-
-
-import javax.swing.JButton;
-
-import javax.swing.JFrame;
-
-import javax.swing.JPanel;
-
-import javax.swing.JScrollPane;
-
-import javax.swing.JTextArea;
-
-import javax.swing.JTextField;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import javax.swing.*;
+import java.awt.Font;
 
 
 
 public class ClientFrame extends JFrame{
 
-	JTextArea textArea; //멤버 참조변수
+	JTextArea textArea; //전송받은 텍스트 출력창 멤버 참조변수
+	JTextField tfMsg;  //전송할 텍스트 입력창
+	JButton btnSend;  //전송 버튼 
+	JButton btnHelp;  //뭐먹지? 버튼
+	String ip;			//접속할 ip
+	int port;			//접속할 port 
+	String name;
 
-	JTextField tfMsg;
-
-	JButton btnSend;
-	
-	String ip;
-	int port;
-
-
-	public Socket clientSocket;
-	
+	public Socket clientSocket; //서버와의 통신을 위함
 
 	
-	
+	public ClientFrame(String ip, int port, String name) {
 
-	public ClientFrame(String ip, int port) {
-
-		
 		this.ip = ip;
 		this.port = port;
+		this.name = name;
 		
 		setTitle("Client");
 
 		setBounds(450, 400, 500, 350);
 
-		
 
 		textArea = new JTextArea();		
 
@@ -98,27 +39,28 @@ public class ClientFrame extends JFrame{
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
-		add(scrollPane,BorderLayout.CENTER);    //채팅화면 중간
+		getContentPane().add(scrollPane,BorderLayout.CENTER);    //채팅화면 중간
 
 				
-
+		JPanel btnpanel = new JPanel(); 		//send, 뭐먹지? 버튼 패널 생성
+		btnSend = new JButton("send");
+		btnHelp = new JButton("\uBB50 \uBA39\uC9C0?");
+		btnHelp.setFont(new Font("LG PC", Font.PLAIN, 12));
+		btnpanel.add(btnSend, BorderLayout.EAST);
+		btnpanel.add(btnHelp, BorderLayout.EAST);
+		
+		
 		JPanel msgPanel = new JPanel();
-
 		msgPanel.setLayout(new BorderLayout());
 
 		tfMsg = new JTextField();
 
-		btnSend = new JButton("send");
-
 		msgPanel.add(tfMsg, BorderLayout.CENTER);
-
-		msgPanel.add(btnSend, BorderLayout.EAST);    
-
+		msgPanel.add(btnpanel, BorderLayout.EAST);    
 		
 
-		add(msgPanel,BorderLayout.SOUTH);
+		getContentPane().add(msgPanel,BorderLayout.SOUTH);
 
-		
 
 		//send 버튼 클릭에 반응하는 리스너 추가
 
@@ -127,9 +69,8 @@ public class ClientFrame extends JFrame{
 			@Override
 
 			public void actionPerformed(ActionEvent e) {
-
 				send(tfMsg.getText());
-
+				tfMsg.setText("");
 			}
 
 		});
@@ -146,8 +87,6 @@ public class ClientFrame extends JFrame{
 
 				super.keyPressed(e);
 
-				
-
 			//입력받은 키가 엔터인지 알아내기, KeyEvent 객체가 키에대한 정보 갖고있음
 
 				int keyCode = e.getKeyCode();
@@ -157,7 +96,7 @@ public class ClientFrame extends JFrame{
 				case KeyEvent.VK_ENTER:
 
 					send(tfMsg.getText());
-
+					tfMsg.setText("");
 					break;
 
 				}
@@ -165,20 +104,28 @@ public class ClientFrame extends JFrame{
 			}
 
 		});
+	
+		
+		//help 버튼 클릭에 반응하는 리스너 추가
+		btnHelp.addActionListener(new ActionListener() {			
 
+			@Override
+
+			public void actionPerformed(ActionEvent e) {
+
+				//help() 함수 실행;
+
+			}
+
+		});
+		
+		
 		startClient();
 
 		setVisible(true);
 
-		tfMsg.requestFocus();
+		tfMsg.requestFocus();			//텍스트 필드에 커서 입력
 
-		/*
-		//서버와 연결하는 네트워크 작업 : 스레드 객체 생성 및 실행
-		ClientThread clientThread = new ClientThread();
-		clientThread.setDaemon(true);
-		clientThread.start();
-	*/
-		
 
 		addWindowListener(new WindowAdapter() {			
 
@@ -189,11 +136,6 @@ public class ClientFrame extends JFrame{
 				super.windowClosing(e);
 
 				try {
-
-					//if(dos != null) dos.close();
-
-					//if(dis != null) dis.close();
-
 					if(clientSocket != null) clientSocket.close();
 
 				} catch (IOException e1) {					
@@ -206,21 +148,25 @@ public class ClientFrame extends JFrame{
 
 		});
 
-		
-
 	}//생성자
 	
 
 
-	public void startClient()    //client 시작해주는 함
+	public void startClient()    //client 시작해주는 함수
 	{
 		Thread thread =new Thread(){
 			public void run()
 			{
 				try {
-
 					clientSocket=new Socket(ip,port);
+
+					setTitle(name);				
+					
+					send(name + " 님이 접속하였습니다.\n");
+					//send(name + " 님이 접속하였습니다.\n",name,true);
+					//send(String str,bool init);
 					recieve();
+					
 					//소켓이 접속 완료 된 부분
 					System.out.println("접속 완료  ");
 					
@@ -234,13 +180,10 @@ public class ClientFrame extends JFrame{
 					
 				}
 				
-			}
-			
+			}	
 			
 		};
-		thread.start();
-		
-	
+		thread.start();		
 		
 	}
 	
@@ -254,7 +197,11 @@ public class ClientFrame extends JFrame{
 				{
 					try {
 						InputStream in=clientSocket.getInputStream();
-						byte[] buffer= new byte[512];  
+//						byte[] a = new byte[4];
+//						int b = in.read(a);
+						
+						byte[] buffer= new byte[512]; 
+					
 						int length=in.read(buffer);
 						if (length==-1) throw new IOException();
 						
@@ -264,10 +211,10 @@ public class ClientFrame extends JFrame{
 						 else
 						*/	 
 						String message=new String(buffer,0,length,"UTF-8");
-					    textArea.append(message+"\n");
+						
+					    textArea.append( message+"\n");
 					    //textArea.setCaretPosition(textArea.getText().length());
 						System.out.println( message); //수신 받은 데이터 게속 출력해주ㄱㅣ  
-							 
 							 
 						
 					} catch (Exception e) {
@@ -278,11 +225,9 @@ public class ClientFrame extends JFrame{
 					}
 					
 				}
-				// TODO Auto-generated method stub
 				
 			}
 			
-		
 		}).start();
 	
 		
@@ -303,28 +248,25 @@ public class ClientFrame extends JFrame{
 						OutputStream out=clientSocket.getOutputStream();
 						//ObjectOutputStream os= new ObjectOutputStream(os);
 						byte[] buffer= message.getBytes("UTF-8");
+						
+//						String aaa = "aaaa";
+//						byte[] bb = aaa.getBytes();
+//						out.write(bb);
+//						out.flush();
+						
 						out.write(buffer);
 						out.flush();
-						
-							
-
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						stopClient();
 					
 					}
 			}
-					
-			
-				
-			
-			
+
 		};
 		thread.start();
 		
-		
 	}
-	
 	
 	public  void stopClient() {
 		

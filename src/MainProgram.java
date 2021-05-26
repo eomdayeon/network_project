@@ -35,6 +35,7 @@ public class MainProgram {
 	private JFrame frame;
 	private JTextField ipField;
 	private JTextField portField;
+	private JTextField nameField;
 
 	/**
 	 * Launch the application.
@@ -71,7 +72,7 @@ public class MainProgram {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		//로그인panel	
+		//로그인 화면 panel 코드 시작
 		ImagePanel loginFrame = new ImagePanel(new ImageIcon("C:/Users/엄다연/eclipse-workspace/java test/image/food.jpg").getImage());
 		frame.getContentPane().add(loginFrame);
 		loginFrame.setLayout(null);
@@ -79,42 +80,56 @@ public class MainProgram {
 		
 		JButton loginbtn = new JButton("enter here");
 		loginbtn.setFont(new Font("Ink Free", Font.PLAIN, 16));
-		loginbtn.setBounds(127, 254, 227, 37);
+		loginbtn.setBounds(127, 275, 227, 37);
 		loginFrame.add(loginbtn);
 			
 		JLabel lbIp = new JLabel("ip : ");
+		lbIp.setForeground(Color.BLACK);
 		lbIp.setFont(new Font("Ink Free", Font.PLAIN, 23));
-		lbIp.setBounds(57, 97, 90, 106);
+		lbIp.setBounds(57, 69, 90, 106);
 		loginFrame.add(lbIp);
 			
 		JLabel lbPort = new JLabel("port : ");
+		lbPort.setForeground(Color.BLACK);
 		lbPort.setFont(new Font("Ink Free", Font.PLAIN, 23));
-		lbPort.setBounds(57, 189, 90, 37);
+		lbPort.setBounds(57, 161, 90, 37);
 		loginFrame.add(lbPort);
 			
 		ipField = new JTextField();
 		ipField.setFont(new Font("Ink Free", Font.PLAIN, 14));
-		ipField.setBounds(127, 134, 227, 37);
+		ipField.setBounds(127, 106, 227, 37);
 		loginFrame.add(ipField);
 		ipField.setColumns(10);
 		
 		portField = new JTextField();
 		portField.setFont(new Font("Ink Free", Font.PLAIN, 14));
-		portField.setBounds(127, 189, 227, 37);
+		portField.setBounds(127, 161, 227, 37);
 		loginFrame.add(portField);
 		portField.setColumns(10);
 			
 		JLabel lblogin = new JLabel("Log in form");
 		lblogin.setForeground(new Color(255, 255, 255));
 		lblogin.setFont(new Font("Ink Free", Font.BOLD, 22));
-		lblogin.setBounds(178, 58, 150, 50);
+		lblogin.setBounds(171, 37, 150, 50);
 		loginFrame.add(lblogin);
 		
+		JLabel lbName = new JLabel("name :");
+		lbName.setForeground(Color.BLACK);
+		lbName.setFont(new Font("Ink Free", Font.PLAIN, 23));
+		lbName.setBounds(57, 215, 112, 50);
+		loginFrame.add(lbName);
+		
+		nameField = new JTextField();
+		nameField.setFont(new Font("Ink Free", Font.PLAIN, 14));
+		nameField.setBounds(127, 216, 227, 37);
+		loginFrame.add(nameField);
+		nameField.setColumns(10);
+		
 		loginFrame.setVisible(false);
+		//로그인 화면 panel 코드 끝
 		
 		
-		
-		//시작화면 panel
+		//프로그램 시작화면 panel 코드 시작
 		ImagePanel startFrame = new ImagePanel(new ImageIcon("C:/Users/엄다연/eclipse-workspace/java test/image/food.jpg").getImage());
 		frame.getContentPane().add(startFrame);
 		startFrame.setLayout(null);
@@ -141,9 +156,10 @@ public class MainProgram {
 		exitbtn.setFont(new Font("LG PC", Font.PLAIN, 16));
 		exitbtn.setBounds(311, 164, 119, 23);
 		startFrame.add(exitbtn);
+		//프로그램 시작화면 panel 코드 끝
 		
 		
-		//버튼 리스너 구현
+		//시작화면에서 start누르면 로그인 페이지로 이동 (버튼 리스너 구현)
 		startbtn.addActionListener(new ActionListener() {
 			
 			@Override
@@ -159,6 +175,7 @@ public class MainProgram {
 			
 		});
 		
+		//시작화면에서 exit누르면 프로그램 종료(버튼 리스너 구현)
 		exitbtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -169,13 +186,13 @@ public class MainProgram {
 			
 		});
 		
-		
+		//로그인화면에서 enter누르면 클라이언트 채팅접속(버튼 리스너 구현)
 		loginbtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//"127.0.0.1", 42756
 				ClientFrame frame;
 				if(ipField.getText().equals("127.0.0.1")&& portField.getText().equals("42756"))
-					frame = new ClientFrame(ipField.getText(), Integer.parseInt(portField.getText()));
+					frame = new ClientFrame(ipField.getText(), Integer.parseInt(portField.getText()),nameField.getText());
 				
 			}
 		});
