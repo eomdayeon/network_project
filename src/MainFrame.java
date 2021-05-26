@@ -49,8 +49,8 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				//ServerFrame 객체 생성
-
-				ServerFrame frame = new ServerFrame();
+				
+				//ServerFrame frame = new ServerFrame();
 
 			}
 
@@ -78,7 +78,7 @@ public class MainFrame extends JFrame {
 
 		
 
-		add(panel, BorderLayout.CENTER);
+		add(panel);
 
 		
 

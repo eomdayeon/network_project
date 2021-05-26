@@ -29,6 +29,25 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Scanner;
+
+
+
 
 import javax.swing.JButton;
 
@@ -52,14 +71,11 @@ public class ClientFrame extends JFrame{
 
 	JButton btnSend;
 
+
+	public Socket clientSocket;
 	
 
-	Socket socket;
-
-	DataInputStream dis;
-
-	DataOutputStream dos;	
-
+	
 	
 
 	public ClientFrame() {
@@ -76,7 +92,7 @@ public class ClientFrame extends JFrame{
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
-		add(scrollPane,BorderLayout.CENTER);
+		add(scrollPane,BorderLayout.CENTER);    //채팅화면 중간
 
 				
 
@@ -90,7 +106,7 @@ public class ClientFrame extends JFrame{
 
 		msgPanel.add(tfMsg, BorderLayout.CENTER);
 
-		msgPanel.add(btnSend, BorderLayout.EAST);
+		msgPanel.add(btnSend, BorderLayout.EAST);    
 
 		
 
@@ -106,7 +122,7 @@ public class ClientFrame extends JFrame{
 
 			public void actionPerformed(ActionEvent e) {
 
-				sendMessage();
+				send(tfMsg.getText());
 
 			}
 
@@ -134,7 +150,7 @@ public class ClientFrame extends JFrame{
 
 				case KeyEvent.VK_ENTER:
 
-					sendMessage();
+					send(tfMsg.getText());
 
 					break;
 
@@ -144,13 +160,13 @@ public class ClientFrame extends JFrame{
 
 		});
 
-		
+		startClient();
 
 		setVisible(true);
 
 		tfMsg.requestFocus();
 
-		
+		/*
 
 		//서버와 연결하는 네트워크 작업 : 스레드 객체 생성 및 실행
 
@@ -159,7 +175,7 @@ public class ClientFrame extends JFrame{
 		clientThread.setDaemon(true);
 
 		clientThread.start();
-
+	*/
 		
 
 		addWindowListener(new WindowAdapter() {			
@@ -172,11 +188,11 @@ public class ClientFrame extends JFrame{
 
 				try {
 
-					if(dos != null) dos.close();
+					//if(dos != null) dos.close();
 
-					if(dis != null) dis.close();
+					//if(dis != null) dis.close();
 
-					if(socket != null) socket.close();
+					if(clientSocket != null) clientSocket.close();
 
 				} catch (IOException e1) {					
 
@@ -191,107 +207,132 @@ public class ClientFrame extends JFrame{
 		
 
 	}//생성자
-
 	
+	
+	
+	
+	public void startClient()    //client 시작해주는 함
+	{
+		
+		try {
 
-	//이너클래스 : 서버와 연결하는 네트워크 작업 스레드
-
-	class ClientThread extends Thread {
-
-		@Override
-
-		public void run() {
-
-			try {
-
-				socket = new Socket("127.0.0.1", 42756);
-
-				textArea.append("서버에 접속됐습니다.\n");
-
-				//데이터 전송을 위한 스트림 생성(입추력 모두)
-
-				InputStream is = socket.getInputStream();
-
-				OutputStream os = socket.getOutputStream();
-
-				
-
-				//보조스트림으로 만들어서 데이터전송 작업을 편하게 ※다른 보조스트림 사용
-
-				dis = new DataInputStream(is);
-
-				dos = new DataOutputStream(os);	
-
-				
-
-				while(true) {//상대방 메시지 받기
-
-					String msg = dis.readUTF();
-
-					textArea.append(" [SERVER] : " + msg + "\n");
-
-					textArea.setCaretPosition(textArea.getText().length());
-
-				}
-
-			} catch (UnknownHostException e) {
-
-				textArea.append("서버 주소가 이상합니다.\n");
-
-			} catch (IOException e) {
-
-				textArea.append("서버와 연결이 끊겼습니다.\n");
-
+			clientSocket=new Socket("127.0.0.1",49157);
+			recieve();
+			//소켓이 접속 완료 된 부분
+			System.out.println("접속 완료  ");
+			
+		}catch(Exception e) {
+			if (clientSocket.isClosed())
+			{
+				stopClient();
+				System.out.println("서버 접속 실패  ");
+			
 			}
-
+			
 		}
-
+		
 	}
-
 	
-
-	//메시지 전송하는 기능 메소드
-
-		void sendMessage() {	
-
-			String msg = tfMsg.getText(); //TextField에 써있는 글씨를 얻어오기
-
-			tfMsg.setText(""); //입력 후 빈칸으로
-
-			textArea.append(" [Clinet] : " + msg + "\n");//1.TextArea(채팅창)에 표시
-
-			textArea.setCaretPosition(textArea.getText().length());
-
-			//2.상대방(Server)에게 메시지 전송하기
-
-			//아웃풋 스트림을 통해 상대방에 데이터 전송
-
-			//네트워크 작업은 별도의 Thread가 하는 것이 좋음
-
-			Thread t = new Thread() {
-
-				@Override
-
-				public void run() {
-
-					try { //UTF = 유니코드의 규약(포맷), 한글 깨지지 않게 해줌
-
-						dos.writeUTF(msg);
-
-						dos.flush(); //계속 채팅 위해 close()하면 안됨				
-
-					} catch (IOException e) {
-
-						e.printStackTrace();
-
+	public void recieve() {
+		new Thread(new Runnable() {
+			boolean isThread= true;
+			
+			@Override
+			public void run() {
+				while(isThread)     //쓰레드종료기능만들어줘야
+				{
+					try {
+						InputStream in=clientSocket.getInputStream();
+						byte[] buffer= new byte[512];  
+						int length=in.read(buffer);
+						if (length==-1) throw new IOException();
+						
+						 /*String recvData=dataInputStream.readUTF();   //quit해주 종료시키기 기
+						 if (recvData.equals("/quit"))
+							 isThread=true;
+						 else
+						*/	 
+						String message=new String(buffer,0,length,"UTF-8");
+					    textArea.append(message+"\n");
+					    //textArea.setCaretPosition(textArea.getText().length());
+						System.out.println( message); //수신 받은 데이터 게속 출력해주ㄱㅣ  
+							 
+							 
+						
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						stopClient();
+						//e.printStackTrace();
+						break;
 					}
-
+					
 				}
+				// TODO Auto-generated method stub
+				
+			}
+			
+		
+		}).start();
+	
+		
+	}
+	
+	public void send(String message)
+	{
+		
+		
+		Thread  thread=new Thread() {
+			//Scanner in=new Scanner(System.in);  //사용자로부터 입력 받기 위해
 
-			};
+			@Override
+			public void run() {
+				
+					try {
+						
+						OutputStream out=clientSocket.getOutputStream();
+						//ObjectOutputStream os= new ObjectOutputStream(os);
+						byte[] buffer= message.getBytes("UTF-8");
+						out.write(buffer);
+						out.flush();
+						
+							
 
-			t.start();			
-
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						stopClient();
+					
+					}
+			}
+					
+			
+				
+			
+			
+		};
+		thread.start();
+		
+		
+	}
+	
+	
+	public  void stopClient() {
+		
+		try {
+			clientSocket.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		// TODO Auto-generated method stub
+		
+	}
+ 
 
 }//class
+
+
+
+
+
